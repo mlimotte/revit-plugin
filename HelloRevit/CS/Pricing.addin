@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Assembly>D:\projects\upwork\revit price ADDON\PriceAddin\HelloRevit\CS\bin\Debug\WebPricing.dll</Assembly>
+    <ClientId>858162cb-b1a1-492c-8992-5463e238d4a3</ClientId>
+    <FullClassName>Revit.Pricing.ExtractModelData</FullClassName>
+    <Text>Extract Model Data</Text>
+    <Description>Shows how a basic ExternalCommand can be added to the Revit user interface.</Description>
+    <VisibilityMode>AlwaysVisible</VisibilityMode>
+    <VendorId>ADSK</VendorId>
+    <VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+  </AddIn>
+    <AddIn Type="Command">
+    <Assembly>D:\projects\upwork\revit price ADDON\PriceAddin\HelloRevit\CS\bin\Debug\WebPricing.dll</Assembly>
+    <ClientId>c10b4563-432c-442e-833a-a9e70acaa0a0</ClientId>
+    <FullClassName>Revit.Pricing.APIHealthCheck</FullClassName>
+    <Text>API Health Check</Text>
+    <Description>Shows how a basic ExternalCommand can be added to the Revit user interface.</Description>
+    <VisibilityMode>AlwaysVisible</VisibilityMode>
+    <VendorId>ADSK</VendorId>
+    <VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+  </AddIn>
+  <AddIn Type="Command">
+    <Assembly>D:\projects\upwork\revit price ADDON\PriceAddin\HelloRevit\CS\bin\Debug\WebPricing.dll</Assembly>
+    <ClientId>b2fde552-d6d0-4fce-9d2f-f4e728401483</ClientId>
+    <FullClassName>Revit.Pricing.GetConfiguration</FullClassName>
+    <Text>Get Configuration</Text>
+    <Description>Shows how a basic ExternalCommand can be added to the Revit user interface.</Description>
+    <VisibilityMode>AlwaysVisible</VisibilityMode>
+    <VendorId>ADSK</VendorId>
+    <VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+  </AddIn>
+    <AddIn Type="Command">
+    <Assembly>D:\projects\upwork\revit price ADDON\PriceAddin\HelloRevit\CS\bin\Debug\WebPricing.dll</Assembly>
+    <ClientId>21b84b8e-dcb5-45fa-a75e-66b69354997f</ClientId>
+    <FullClassName>Revit.Pricing.PriceRequest</FullClassName>
+    <Text>Update Pricing</Text>
+    <Description>Shows how a basic ExternalCommand can be added to the Revit user interface.</Description>
+    <VisibilityMode>AlwaysVisible</VisibilityMode>
+    <VendorId>ADSK</VendorId>
+    <VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+  </AddIn>
+</RevitAddIns>
