@@ -13,48 +13,100 @@ namespace Revit.Pricing
     //methods for retrieving and updating parameter values
     public static class PricingRevitInteraction
     {
-        //public static bool UpdateFamilySymbolParameter(Document curDoc,string familyName,string familySymbolName,string parameterName, string parameterValue)
-        //{
-        //    ElementClassFilter FamilyFilter = new ElementClassFilter(typeof(Family));
-        //    FilteredElementCollector FamilyCollector = new FilteredElementCollector(curDoc);
-        //    ICollection<Element> AllFamilies = FamilyCollector.WherePasses(FamilyFilter).ToElements().Where(myEl => (myEl as Family).Name == familyName); ;
-        //    foreach (Family Fmly in AllFamilies)
-        //    {
-        //        string FamilyName = Fmly.Name;
 
-        //        lines.Add("Family ID:	" + Fmly.Id.ToString() + "	,	Family name:	" + FamilyName);
-        //        foreach (Parameter myParam in Fmly.Parameters)
-        //        {
-
-        //            lines.Add("	Param ID:	" + myParam.Id.IntegerValue.ToString() + "	,	Param name:	" + myParam.Definition.Name + "	:	Param value:	" + myParam.AsValueString());
-
-
-        //        }
-
-        //        lines.Add("Family Symbols:");
-
-        //        foreach (ElementId symid in Fmly.GetFamilySymbolIds())
-        //        {
-        //            FamilySymbol FmlyS = curDoc.GetElement(symid) as FamilySymbol;
+        //WIP - might not be needed
+        public static bool UpdateFamilySymbolParameter(Document curDoc, string familyName, string familySymbolName, string parameterName, string parameterValue)
+        {
+            ElementClassFilter FamilyFilter = new ElementClassFilter(typeof(Family));
+            FilteredElementCollector FamilyCollector = new FilteredElementCollector(curDoc);
+            List<Element> AllFamilies = FamilyCollector.WherePasses(FamilyFilter).ToElements().Where(myEl => (myEl as Family).Name == familyName).ToList();
+            //not found
+            if (AllFamilies.Count == 0) return false;
+            Family foundFam = AllFamilies[0] as Family;
+            bool foundSym = false;
+            bool foundPar = false;
+            foreach (ElementId symid in foundFam.GetFamilySymbolIds())
+            {
 
 
-
-        //            lines.Add(" Family Symbol ID:	" + FmlyS.Id.ToString() + "	,	Family Symbol name:	" + FmlyS.Name);
-
-        //            foreach (Parameter myParam in FmlyS.Parameters)
-        //            {
-
-        //                lines.Add("	    Param ID:	" + myParam.Id.IntegerValue.ToString() + "	,	Param name:	" + myParam.Definition.Name + "	:	Param value:	" + myParam.AsValueString());
+                FamilySymbol FmlyS = curDoc.GetElement(symid) as FamilySymbol;
+                foundPar = false;
+                if (FmlyS.Name == familySymbolName)
+                {
+                    foundSym = true;
 
 
-        //            }
+                    foreach (Parameter myParam in FmlyS.Parameters)
+                    {
+
+                        if (myParam.Definition.Name == parameterName)
+                        {
+                            foundPar = true;
+                            try
+                            {
+
+                            }
+                            catch
+                            {
+                                return false;
+                            }
+                            foundPar = true;
+                            break;
+                        }
 
 
-        //        }
+                    }
 
 
 
-        //    }
-        //}
+                }
+                if (foundSym) break;
+
+
+            }
+            if (foundSym && foundPar) return true;
+            return false;
+        }
+
+        public static bool UpdateElementParameterValue(Document curDoc, string elemeID, string parameterName, string parameterValue)
+        {
+            Element myElem = curDoc.GetElement(new ElementId(Convert.ToInt32(elemeID)));
+            if (myElem == null) return false;
+            bool foundPar = false;
+            foreach (Parameter myParam in myElem.Parameters)
+            {
+
+                if (myParam.Definition.Name == parameterName)
+                {
+                    foundPar = true;
+                    try
+                    {
+                        using (Transaction t = new Transaction(curDoc, "Set Parameter"))
+                        {
+                            t.Start();
+
+
+                            //myParam.SetValueString(parameterValue);
+
+                            myParam.Set(parameterValue);
+
+                            t.Commit();
+                        }
+
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+
+                    break;
+                }
+
+
+            }
+            if (foundPar) return true;
+            return false;
+        }
+
     }
 }

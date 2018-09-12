@@ -33,10 +33,7 @@ using Newtonsoft.Json;
 
 namespace Revit.Pricing
 {
-    /// <summary>
-    /// Demonstrate how a basic ExternalCommand can be added to the Revit user interface. 
-    /// And demonstrate how to create a Revit style dialog.
-    /// </summary>
+    
     [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
     [Autodesk.Revit.Attributes.Regeneration(Autodesk.Revit.Attributes.RegenerationOption.Manual)]
     [Autodesk.Revit.Attributes.Journaling(Autodesk.Revit.Attributes.JournalingMode.NoCommandData)]
@@ -163,6 +160,9 @@ namespace Revit.Pricing
 
         #endregion
     }
+
+
+
     [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
     [Autodesk.Revit.Attributes.Regeneration(Autodesk.Revit.Attributes.RegenerationOption.Manual)]
     [Autodesk.Revit.Attributes.Journaling(Autodesk.Revit.Attributes.JournalingMode.NoCommandData)]
@@ -213,12 +213,12 @@ namespace Revit.Pricing
     [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
     [Autodesk.Revit.Attributes.Regeneration(Autodesk.Revit.Attributes.RegenerationOption.Manual)]
     [Autodesk.Revit.Attributes.Journaling(Autodesk.Revit.Attributes.JournalingMode.NoCommandData)]
-    public class GetConfiguration : IExternalCommand
+    public class TestGetConfiguration : IExternalCommand
     {
         #region IExternalCommand Members
 
         /// <summary>
-        /// Gets config
+        /// Gets config for testing purposes, displays
         /// </summary>
         /// <param name="commandData">An object that is passed to the external application
         /// which contains data related to the command,
@@ -257,19 +257,16 @@ namespace Revit.Pricing
         #endregion
     }
 
-    /// <summary>
-    /// Demonstrate how a basic ExternalCommand can be added to the Revit user interface. 
-    /// And demonstrate how to create a Revit style dialog.
-    /// </summary>
+    
     [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
     [Autodesk.Revit.Attributes.Regeneration(Autodesk.Revit.Attributes.RegenerationOption.Manual)]
     [Autodesk.Revit.Attributes.Journaling(Autodesk.Revit.Attributes.JournalingMode.NoCommandData)]
-    public class PriceRequest : IExternalCommand
+    public class TestPriceRequest : IExternalCommand
     {
         #region IExternalCommand Members
 
         /// <summary>
-        /// Submits pricing request
+        /// generates pricing request JSON - no cartegory filter -  save as file
         /// </summary>
         /// <param name="commandData">An object that is passed to the external application
         /// which contains data related to the command,
@@ -295,79 +292,7 @@ namespace Revit.Pricing
             Application app = commandData.Application.Application;
             Document curDoc = commandData.Application.ActiveUIDocument.Document;
 
-            RevitPricingRequest price1 = new RevitPricingRequest();
-
-            price1.projectID = curDoc.ProjectInformation.UniqueId.ToString();
-
-
-
-
-
-            //filter for family instances
-            FilteredElementCollector famCol = new FilteredElementCollector(curDoc);
-           famCol.OfClass(typeof(FamilyInstance));
-            IList<Element> famElems = famCol.ToElements();
-            //iterate
-            foreach (Element myE in famElems)
-            {
-
-
-                pElement fIelem = new pElement();
-                fIelem.id = myE.Id.ToString();
-                fIelem.name = myE.Name;
-                fIelem.elementClassName = "FamilyInstance";
-                FamilyInstance myFamInst = myE as FamilyInstance;
-                fIelem.properties.Add("Family Name", myFamInst.Symbol.FamilyName);
-                fIelem.properties.Add("Family Symbol", myFamInst.Symbol.Name);
-
-                foreach (Parameter myParam in myFamInst.Parameters)
-                {
-                    if (!fIelem.properties.ContainsKey(myParam.Definition.Name) && myParam.AsValueString()!="" && myParam.AsValueString() != "null" && myParam.AsValueString() != null)
-                    fIelem.properties.Add(myParam.Definition.Name, myParam.AsValueString());
-                 
-                }
-
-                price1.elements.Add(fIelem);
-
-            }
-
-            ElementClassFilter FamilyFilter = new ElementClassFilter(typeof(Family));
-            FilteredElementCollector FamilyCollector = new FilteredElementCollector(curDoc);
-            ICollection<Element> AllFamilies = FamilyCollector.WherePasses(FamilyFilter).ToElements();
-            foreach (Family Fmly in AllFamilies)
-            {
-                string FamilyName = Fmly.Name;
-
-               
-
-                foreach (ElementId symid in Fmly.GetFamilySymbolIds())
-                {
-                    FamilySymbol FmlyS = curDoc.GetElement(symid) as FamilySymbol;
-
-                    pElement fIelem = new pElement();
-                    fIelem.id = FmlyS.Id.ToString();
-                    fIelem.name = FmlyS.Name;
-                    fIelem.elementClassName = "FamilySymbol";
-
-                    fIelem.properties.Add("Family Name", FamilyName);
-                    fIelem.properties.Add("Family Symbol", FmlyS.Name);
-
-
-                   
-                    foreach (Parameter myParam in FmlyS.Parameters)
-                    {
-
-                        if (!fIelem.properties.ContainsKey(myParam.Definition.Name) && myParam.AsValueString() != "" && myParam.AsValueString() != "null" && myParam.AsValueString() != null)
-                            fIelem.properties.Add(myParam.Definition.Name, myParam.AsValueString());
-
-                    }
-
-                    price1.elements.Add(fIelem);
-                }
-
-
-
-            }
+            revit_pricing_request price1 = utilities.get_pricing_request(curDoc, new List<string>());
 
             string serialS = JsonConvert.SerializeObject(price1);
             System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
@@ -381,6 +306,163 @@ namespace Revit.Pricing
                 System.IO.File.WriteAllText(saveFileDialog1.FileName,serialS);
             }
 
+            return Autodesk.Revit.UI.Result.Succeeded;
+        }
+
+        #endregion
+    }
+
+
+    [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
+    [Autodesk.Revit.Attributes.Regeneration(Autodesk.Revit.Attributes.RegenerationOption.Manual)]
+    [Autodesk.Revit.Attributes.Journaling(Autodesk.Revit.Attributes.JournalingMode.NoCommandData)]
+    public class TestPriceRequestCategories : IExternalCommand
+    {
+        #region IExternalCommand Members
+
+        /// <summary>
+        /// generates pricing request JSON - retrieves categories from server -  save as file
+        /// </summary>
+        /// <param name="commandData">An object that is passed to the external application
+        /// which contains data related to the command,
+        /// such as the application object and active view.</param>
+        /// <param name="message">A message that can be set by the external application
+        /// which will be displayed if a failure or cancellation is returned by
+        /// the external command.</param>
+        /// <param name="elements">A set of elements to which the external application
+        /// can add elements that are to be highlighted in case of failure or cancellation.</param>
+        /// <returns>Return the status of the external command.
+        /// A result of Succeeded means that the API external method functioned as expected.
+        /// Cancelled can be used to signify that the user cancelled the external operation 
+        /// at some point. Failure should be returned if the application is unable to proceed with
+        /// the operation.</returns>
+        public Autodesk.Revit.UI.Result Execute(ExternalCommandData commandData,
+            ref string message, Autodesk.Revit.DB.ElementSet elements)
+        {
+            // NOTES: Anything can be done in this method, such as create a message box, 
+            // a task dialog or fetch some information from revit and so on.
+            // We mainly use the task dialog for example.
+
+            // Get the application and document from external command data.
+            Application app = commandData.Application.Application;
+            Document curDoc = commandData.Application.ActiveUIDocument.Document;
+
+            List<string> cats = new List<string>();
+
+            PricingHttpRest.InitializeClient("http://api.fairhomemaine.com", "");
+            string configJSON = "";
+            try
+            {
+                PricingHttpRest.APICommand = "pricing/config";
+                string result = PricingHttpRest.Get();
+
+                configJSON= PricingHttpRest.receivedContent;
+                if (result != "OK")
+                {
+                    System.Windows.Forms.MessageBox.Show("Error accessing API");
+                    return Autodesk.Revit.UI.Result.Failed;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Error accessing API");
+                return Autodesk.Revit.UI.Result.Failed;
+            }
+
+           
+            try
+            {
+
+
+
+                Newtonsoft.Json.Linq.JToken jt = Newtonsoft.Json.Linq.JObject.Parse(configJSON);
+                Newtonsoft.Json.Linq.JToken jfil = jt.SelectToken("filters");
+                Newtonsoft.Json.Linq.JToken jcat = jfil.SelectToken("categories");
+                 cats = jcat.ToObject<List<string>>();
+
+            }
+            catch(Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Deserialization failure: "+ ex.ToString());
+                return Autodesk.Revit.UI.Result.Failed;
+            }
+            if (cats.Count == 0)
+                System.Windows.Forms.MessageBox.Show("No categories found, taking all");
+            //if (myConf.filters.Count==0)
+            //{
+            //    System.Windows.Forms.MessageBox.Show("No config data");
+            //    return Autodesk.Revit.UI.Result.Failed;
+            //}
+
+            revit_pricing_request price1 = utilities.get_pricing_request(curDoc, cats);
+
+
+
+            string serialS = JsonConvert.SerializeObject(price1);
+            System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            saveFileDialog1.Filter = "Text file|*.txt";
+            saveFileDialog1.Title = "Save Query";
+            saveFileDialog1.ShowDialog();
+
+            // If the file name is not an empty string open it for saving.  
+            if (saveFileDialog1.FileName != "")
+            {
+                System.IO.File.WriteAllText(saveFileDialog1.FileName, serialS);
+            }
+
+            return Autodesk.Revit.UI.Result.Succeeded;
+        }
+
+        #endregion
+    }
+
+
+    [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
+    [Autodesk.Revit.Attributes.Regeneration(Autodesk.Revit.Attributes.RegenerationOption.Manual)]
+    [Autodesk.Revit.Attributes.Journaling(Autodesk.Revit.Attributes.JournalingMode.NoCommandData)]
+    public class TestParameterChange : IExternalCommand
+    {
+        #region IExternalCommand Members
+
+        /// <summary>
+        /// Tests function to change parameter value
+        /// </summary>
+        /// <param name="commandData">An object that is passed to the external application
+        /// which contains data related to the command,
+        /// such as the application object and active view.</param>
+        /// <param name="message">A message that can be set by the external application
+        /// which will be displayed if a failure or cancellation is returned by
+        /// the external command.</param>
+        /// <param name="elements">A set of elements to which the external application
+        /// can add elements that are to be highlighted in case of failure or cancellation.</param>
+        /// <returns>Return the status of the external command.
+        /// A result of Succeeded means that the API external method functioned as expected.
+        /// Cancelled can be used to signify that the user cancelled the external operation 
+        /// at some point. Failure should be returned if the application is unable to proceed with
+        /// the operation.</returns>
+        public Autodesk.Revit.UI.Result Execute(ExternalCommandData commandData,
+            ref string message, Autodesk.Revit.DB.ElementSet elements)
+        {
+            // NOTES: Anything can be done in this method, such as create a message box, 
+            // a task dialog or fetch some information from revit and so on.
+            // We mainly use the task dialog for example.
+
+            // Get the application and document from external command data.
+            Application app = commandData.Application.Application;
+            Document curDoc = commandData.Application.ActiveUIDocument.Document;
+
+            PricingRevitInteraction.UpdateElementParameterValue(curDoc, "352672", "Mark", "Testcomments");
+
+            using (Transaction t = new Transaction(curDoc, "Regen"))
+            {
+                t.Start();
+
+
+                curDoc.Regenerate();
+                t.Commit();
+            }
+
+            
             return Autodesk.Revit.UI.Result.Succeeded;
         }
 
