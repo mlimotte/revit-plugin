@@ -66,13 +66,13 @@ namespace Revit.Pricing
         {
             revit_pricing_request price1 = new revit_pricing_request();
 
-            price1.project_id = curDoc.ProjectInformation.UniqueId.ToString().ToLower().Replace(" ", "_");
+            price1.project_id = curDoc.ProjectInformation.UniqueId.ToString();//.ToLower().Replace(" ", "_");
 
             //formatted snake_case
             List<string> formCat = new List<string>();
             foreach (string cate in categories)
             {
-                formCat.Add(cate.ToLower().Replace(" ", "_"));
+                formCat.Add(cate);//.ToLower().Replace(" ", "_"));
             }
 
 
@@ -86,18 +86,28 @@ namespace Revit.Pricing
 
 
                 p_element fIelem = new p_element();
-                fIelem.id = myE.Id.ToString().ToLower().Replace(" ", "_");
-                fIelem.name = myE.Name.ToLower().Replace(" ", "_");
-                fIelem.element_class_name = "family_instance";
+                fIelem.id = myE.Id.ToString();//.ToLower().Replace(" ", "_");
+                fIelem.name = myE.Name;//.ToLower().Replace(" ", "_");
+                fIelem.element_class_name = "Family Instance";
                 FamilyInstance myFamInst = myE as FamilyInstance;
-                fIelem.properties.Add("family_name", myFamInst.Symbol.FamilyName.ToLower().Replace(" ", "_"));
-                fIelem.properties.Add("family_symbol_name", myFamInst.Symbol.Name.ToLower().Replace(" ", "_"));
+                fIelem.properties.Add("family_name", myFamInst.Symbol.FamilyName);//.ToLower().Replace(" ", "_"));
+                fIelem.properties.Add("family_symbol_name", myFamInst.Symbol.Name);//.ToLower().Replace(" ", "_"));
 
                 foreach (Parameter myParam in myFamInst.Parameters)
                 {
-                    if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")) && myParam.AsValueString() != "" && myParam.AsValueString() != "null" && myParam.AsValueString() != null)
-                        fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsValueString().ToLower().Replace(" ", "_"));
 
+
+                    if (myParam.StorageType == StorageType.String)
+                    {
+                        if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")) && myParam.AsString() != "" && myParam.AsString() != "null" && myParam.AsString() != null)
+                            fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsString());//.ToLower().Replace(" ", "_"));
+
+                    }
+                    else
+                    {
+                        if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")) && myParam.AsValueString() != "" && myParam.AsValueString() != "null" && myParam.AsValueString() != null)
+                            fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsValueString());//.ToLower().Replace(" ", "_"));
+                    }
                 }
 
                 if (categories.Count!=0)
@@ -134,21 +144,29 @@ namespace Revit.Pricing
                     FamilySymbol FmlyS = curDoc.GetElement(symid) as FamilySymbol;
 
                     p_element fIelem = new p_element();
-                    fIelem.id = FmlyS.Id.ToString().ToLower().Replace(" ", "_");
-                    fIelem.name = FmlyS.Name.ToLower().Replace(" ", "_");
-                    fIelem.element_class_name = "family_symbol";
+                    fIelem.id = FmlyS.Id.ToString();//.ToLower().Replace(" ", "_");
+                    fIelem.name = FmlyS.Name;//.ToLower().Replace(" ", "_");
+                    fIelem.element_class_name = "Family Symbol";
 
-                    fIelem.properties.Add("family_name", FamilyName.ToLower().Replace(" ", "_"));
-                    fIelem.properties.Add("family_symbol_name", FmlyS.Name.ToLower().Replace(" ", "_"));
+                    fIelem.properties.Add("family_name", FamilyName);//.ToLower().Replace(" ", "_"));
+                    fIelem.properties.Add("family_symbol_name", FmlyS.Name);//.ToLower().Replace(" ", "_"));
 
 
 
                     foreach (Parameter myParam in FmlyS.Parameters)
                     {
 
-                        if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")) && myParam.AsValueString() != "" && myParam.AsValueString() != "null" && myParam.AsValueString() != null)
-                            fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsValueString().ToLower().Replace(" ", "_"));
+                        if (myParam.StorageType == StorageType.String)
+                        {
+                            if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")) && myParam.AsString() != "" && myParam.AsString() != "null" && myParam.AsString() != null)
+                                fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsString());//.ToLower().Replace(" ", "_"));
 
+                        }
+                        else
+                        {
+                            if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")) && myParam.AsValueString() != "" && myParam.AsValueString() != "null" && myParam.AsValueString() != null)
+                                fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsValueString());//.ToLower().Replace(" ", "_"));
+                        }
                     }
 
                     if (categories.Count != 0)
