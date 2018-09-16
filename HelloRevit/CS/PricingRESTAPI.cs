@@ -37,7 +37,7 @@ namespace Revit.Pricing
         /// <summary>
         /// Data received
         /// </summary>
-       public static string receivedContent {  get; private set; }
+        public static string receivedContent { get; private set; }
         /// <summary>
         /// Status Code
         /// </summary>
@@ -77,7 +77,7 @@ namespace Revit.Pricing
         /// <summary>
         /// Submits 
         /// </summary>
-        /// <returns>POST server reason</returns>
+        /// <returns>Get server reason</returns>
         public static string Get()
         {
             if (!initOK)
@@ -85,69 +85,124 @@ namespace Revit.Pricing
                 return "Client not initialized";
             }
             string s = RunGetAsync().GetAwaiter().GetResult();
-            
+
             return s;
 
         }
 
 
+        public static string Post()
+        {
+            if (!initOK)
+            {
+                return "Client not initialized";
+            }
+            string s = RunPostAsync().GetAwaiter().GetResult();
 
-      
+            return s;
+        }
+
+
 
         static async Task<HttpResponseMessage> SendPostRequestAsync(string adaptiveUri, string xmlRequest)
         {
-            using (HttpClient httpClient = new HttpClient())
-            {
-                StringContent httpConent = new StringContent(xmlRequest, Encoding.UTF8, "application/json");
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(
-                           new MediaTypeWithQualityHeaderValue("application/json"));
-                HttpResponseMessage responseMessage = null;
-                try
-                {
+            //using (HttpClient httpClient = new HttpClient())
+            //{
+            client = new HttpClient();
 
-                    responseMessage = await httpClient.PostAsync(adaptiveUri, httpConent).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    if (responseMessage == null)
-                    {
-                        responseMessage = new HttpResponseMessage();
-                    }
-                    responseMessage.StatusCode = HttpStatusCode.InternalServerError;
-                    responseMessage.ReasonPhrase = string.Format("RestHttpClient.SendPostRequest failed: {0}", ex);
-                }
-                return responseMessage;
+            // StringContent httpContent = new StringContent(xmlRequest, Encoding.UTF8, "application/json");
+
+
+            var buffer = System.Text.Encoding.UTF8.GetBytes(xmlRequest);
+            var byteContent = new ByteArrayContent(buffer);
+            // Next, you want to set the content type to let the API know this is JSON.
+
+            byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            // client.DefaultRequestHeaders.Accept.Clear();
+            //client.DefaultRequestHeaders.Accept.Add(
+            //   new MediaTypeWithQualityHeaderValue("application/json"));
+
+            HttpResponseMessage responseMessage = null;
+            try
+            {
+
+
+                responseMessage = await client.PostAsync(adaptiveUri, byteContent).ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                if (responseMessage == null)
+                {
+                    responseMessage = new HttpResponseMessage();
+                }
+                responseMessage.StatusCode = HttpStatusCode.InternalServerError;
+                responseMessage.ReasonPhrase = string.Format("RestHttpClient.SendPostRequest failed: {0}", ex);
+            }
+            return responseMessage;
+            //}
         }
+
 
 
         static async Task<HttpResponseMessage> SendGetRequestAsync(string adaptiveUri, string xmlRequest)
         {
-            using (HttpClient httpClient = new HttpClient())
-            {
-                StringContent httpConent = new StringContent(xmlRequest, Encoding.UTF8, "application/json");
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(
-                           new MediaTypeWithQualityHeaderValue("application/json"));
-                HttpResponseMessage responseMessage = null;
-                try
-                {
+            //using (HttpClient httpClient = new HttpClient())
+            //{
 
-                    responseMessage = await httpClient.GetAsync(adaptiveUri).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    if (responseMessage == null)
-                    {
-                        responseMessage = new HttpResponseMessage();
-                    }
-                    responseMessage.StatusCode = HttpStatusCode.InternalServerError;
-                    responseMessage.ReasonPhrase = string.Format("RestHttpClient.SendPostRequest failed: {0}", ex);
-                }
-                return responseMessage;
+            client = new HttpClient();
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(
+                       new MediaTypeWithQualityHeaderValue("application/json"));
+
+            HttpResponseMessage responseMessage = null;
+
+            //if (xmlRequest == "")
+            //{
+
+            //StringContent httpConent = new StringContent(xmlRequest, Encoding.UTF8, "application/json");
+
+            try
+            {
+
+                responseMessage = await client.GetAsync(adaptiveUri).ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                if (responseMessage == null)
+                {
+                    responseMessage = new HttpResponseMessage();
+                }
+                responseMessage.StatusCode = HttpStatusCode.InternalServerError;
+                responseMessage.ReasonPhrase = string.Format("RestHttpClient.SendPostRequest failed: {0}", ex);
+            }
+            return responseMessage;
+            //}
+            //else
+            //{
+            //    // StringContent httpConent = new StringContent(xmlRequest, Encoding.UTF8, "application/json");
+            //    //s//tring sc = await httpConent.ReadAsStringAsync();
+            //    try
+            //    {
+
+            //        responseMessage = await httpClient.GetAsync(adaptiveUri).ConfigureAwait(false);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        if (responseMessage == null)
+            //        {
+            //            responseMessage = new HttpResponseMessage();
+            //        }
+            //        responseMessage.StatusCode = HttpStatusCode.InternalServerError;
+            //        responseMessage.ReasonPhrase = string.Format("RestHttpClient.SendPostRequest failed: {0}", ex);
+            //    }
+            //    return responseMessage;
+            //}
+            //}
         }
+
+
+
         /// <summary>
         /// GET request with parameters specified for PricingHttpRest class. Populates properties of PricingHttpRest class.
         /// </summary>
@@ -176,7 +231,28 @@ namespace Revit.Pricing
         }
 
 
+        static async Task<string> RunPostAsync()
+        {
+            try
+            {
+                if (address.Contains("http://"))
+                    address = address.Replace("http://", "");
 
+                string aur = "http://" + address + ":" + port + "/" + APICommand;
+
+                if (port == "")
+                    aur = "http://" + address + "/" + APICommand;
+
+                var hrc = await SendPostRequestAsync(aur, sendContent).ConfigureAwait(false);
+                receivedContent = await hrc.Content.ReadAsStringAsync();
+                receivedCode = hrc.StatusCode.ToString();
+                return hrc.ReasonPhrase;
+            }
+            catch
+            {
+                return "Error Connecting";
+            }
+        }
 
     }
 

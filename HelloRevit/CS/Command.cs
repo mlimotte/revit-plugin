@@ -575,18 +575,18 @@ namespace Revit.Pricing
                 PricingHttpRest.APICommand = "pricing/model1";
                 PricingHttpRest.sendContent = serialS;
 
-                string result = PricingHttpRest.Get();
+                string result = PricingHttpRest.Post();
 
                 pricesJSON = PricingHttpRest.receivedContent;
                 if (result != "OK")
                 {
-                    System.Windows.Forms.MessageBox.Show("Error accessing API while submitting instance data for pricing: " + result);
+                    System.Windows.Forms.MessageBox.Show("Error accessing API while submitting  data for pricing: " + result + " " + pricesJSON);
                     return Autodesk.Revit.UI.Result.Failed;
                 }
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show("Error accessing API while submitting instance data for pricing");
+                System.Windows.Forms.MessageBox.Show("Error accessing API while submitting  data for pricing: " + ex.ToString());
                 return Autodesk.Revit.UI.Result.Failed;
             }
 
@@ -644,7 +644,7 @@ namespace Revit.Pricing
 
             List<string> cats = new List<string>();
 
-            PricingHttpRest.InitializeClient("http://api.fairhomemaine.com", "");
+            PricingHttpRest.InitializeClient("http://api.fairhomemaine.com", "");// "https://ce7649b3.ngrok.io", "");
 
             // Displays an OpenFileDialog so the user can select a Cursor.  
             System.Windows.Forms.OpenFileDialog openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -665,18 +665,18 @@ namespace Revit.Pricing
                 PricingHttpRest.APICommand = "pricing/model1";
                 PricingHttpRest.sendContent = serialS;
 
-                string result = PricingHttpRest.Get();
+                string result = PricingHttpRest.Post();
 
                 pricesJSON = PricingHttpRest.receivedContent;
                 if (result != "OK")
                 {
-                    System.Windows.Forms.MessageBox.Show("Error accessing API while submitting sample data for pricing: " + result);
+                    System.Windows.Forms.MessageBox.Show("Error accessing API while submitting sample data for pricing: " + result+" "+pricesJSON);
                     return Autodesk.Revit.UI.Result.Failed;
                 }
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show("Error accessing API while submitting sample data for pricing");
+                System.Windows.Forms.MessageBox.Show("Error accessing API while submitting sample data for pricing: "+ex.ToString());
                 return Autodesk.Revit.UI.Result.Failed;
             }
 
@@ -790,18 +790,18 @@ namespace Revit.Pricing
                 PricingHttpRest.APICommand = "pricing/model1";
                 PricingHttpRest.sendContent = serialS;
 
-                string result = PricingHttpRest.Get();
+                string result = PricingHttpRest.Post();
 
                 pricesJSON = PricingHttpRest.receivedContent;
                 if (result != "OK")
                 {
-                    System.Windows.Forms.MessageBox.Show("Error accessing API while submitting instance data for pricing: "+result);
+                    System.Windows.Forms.MessageBox.Show("Error accessing API while submitting data for pricing: " + result + " " + pricesJSON);
                     return Autodesk.Revit.UI.Result.Failed;
                 }
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show("Error accessing API while submitting instance data for pricing");
+                System.Windows.Forms.MessageBox.Show("Error accessing API while submitting  data for pricing: " + ex.ToString());
                 return Autodesk.Revit.UI.Result.Failed;
             }
 

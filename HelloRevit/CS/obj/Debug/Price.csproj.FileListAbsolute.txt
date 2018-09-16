@@ -16,3 +16,7 @@ D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\obj\D
 D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\obj\Debug\Price.csprojAssemblyReference.cache
 D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\obj\Debug\Price.csproj.CoreCompileInputs.cache
 D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\obj\Debug\Price.csproj.CopyComplete
+D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\bin\Debug\WebPricing.dll.config
+D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\bin\Debug\System.Net.Http.Extensions.dll
+D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\bin\Debug\System.Net.Http.Formatting.dll
+D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\bin\Debug\System.Net.Http.Primitives.dll
