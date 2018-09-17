@@ -68,7 +68,7 @@ namespace Revit.Pricing
             return false;
         }
 
-        public static bool UpdateElementParameterValue(Document curDoc, string elemeID, string parameterName, string parameterValue)
+        public static bool UpdateElementParameterValueDouble(Document curDoc, string elemeID, string parameterName, double parameterValue)
         {
             Element myElem = curDoc.GetElement(new ElementId(Convert.ToInt32(elemeID)));
             if (myElem == null) return false;
@@ -76,7 +76,7 @@ namespace Revit.Pricing
             foreach (Parameter myParam in myElem.Parameters)
             {
 
-                if (myParam.Definition.Name == parameterName)
+                if (myParam.Definition.Name.ToLower() == parameterName.ToLower())
                 {
                     foundPar = true;
                     try
@@ -105,8 +105,125 @@ namespace Revit.Pricing
 
             }
             if (foundPar) return true;
+            //look through family symbol parameters
+            FamilyInstance fm = myElem as FamilyInstance;
+            if (fm == null) return false;
+            FamilySymbol fmsym = fm.Symbol;
+            if (fmsym == null) return false;
+            foreach (Parameter myParam in fmsym.Parameters)
+            {
+
+                if (myParam.Definition.Name.ToLower() == parameterName.ToLower())
+                {
+                    foundPar = true;
+                    try
+                    {
+                        using (Transaction t = new Transaction(curDoc, "Set Parameter"))
+                        {
+                            t.Start();
+
+
+                            //myParam.SetValueString(parameterValue);
+
+                            myParam.Set(parameterValue);
+
+                            t.Commit();
+                        }
+
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+
+                    break;
+                }
+
+
+            }
+
+            if (foundPar) return true;
             return false;
         }
+
+        public static bool UpdateElementParameterValueString(Document curDoc, string elemeID, string parameterName, string parameterValue)
+        {
+            Element myElem = curDoc.GetElement(new ElementId(Convert.ToInt32(elemeID)));
+            if (myElem == null) return false;
+            bool foundPar = false;
+            foreach (Parameter myParam in myElem.Parameters)
+            {
+
+                if (myParam.Definition.Name.ToLower() == parameterName.ToLower())
+                {
+                    foundPar = true;
+                    try
+                    {
+                        using (Transaction t = new Transaction(curDoc, "Set Parameter"))
+                        {
+                            t.Start();
+
+
+                            //myParam.SetValueString(parameterValue);
+
+                            myParam.Set(parameterValue);
+
+                            t.Commit();
+                        }
+
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+
+                    break;
+                }
+
+
+            }
+            if (foundPar) return true;
+            //look through family symbol parameters
+            FamilyInstance fm = myElem as FamilyInstance;
+            if (fm == null) return false;
+            FamilySymbol fmsym = fm.Symbol;
+            if (fmsym == null) return false;
+            foreach (Parameter myParam in fmsym.Parameters)
+            {
+
+                if (myParam.Definition.Name.ToLower() == parameterName.ToLower())
+                {
+                    foundPar = true;
+                    try
+                    {
+                        using (Transaction t = new Transaction(curDoc, "Set Parameter"))
+                        {
+                            t.Start();
+
+
+                            //myParam.SetValueString(parameterValue);
+
+                            myParam.Set(parameterValue);
+
+                            t.Commit();
+                        }
+
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+
+                    break;
+                }
+
+
+            }
+
+            if (foundPar) return true;
+            return false;
+        }
+
 
     }
 }

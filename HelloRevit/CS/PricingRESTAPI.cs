@@ -256,4 +256,14 @@ namespace Revit.Pricing
 
     }
 
+    /// <summary>
+    /// For parsing price / instance
+    /// </summary>
+    public class PriceResponseElement
+    {
+        public string id { get; set; }
+        public string result { get; set; }
+        public double cost { get; set; }
+    }
+
 }

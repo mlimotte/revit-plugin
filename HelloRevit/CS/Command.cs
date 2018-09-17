@@ -1,24 +1,4 @@
-//
-// (C) Copyright 2003-2017 by Autodesk, Inc.
-//
-// Permission to use, copy, modify, and distribute this software in
-// object code form for any purpose and without fee is hereby granted,
-// provided that the above copyright notice appears in all copies and
-// that both that copyright notice and the limited warranty and
-// restricted rights notice below appear in all supporting
-// documentation.
-//
-// AUTODESK PROVIDES THIS PROGRAM "AS IS" AND WITH ALL FAULTS.
-// AUTODESK SPECIFICALLY DISCLAIMS ANY IMPLIED WARRANTY OF
-// MERCHANTABILITY OR FITNESS FOR A PARTICULAR USE. AUTODESK, INC.
-// DOES NOT WARRANT THAT THE OPERATION OF THE PROGRAM WILL BE
-// UNINTERRUPTED OR ERROR FREE.
-//
-// Use, duplication, or disclosure by the U.S. Government is subject to
-// restrictions set forth in FAR 52.227-19 (Commercial Computer
-// Software - Restricted Rights) and DFAR 252.227-7013(c)(1)(ii)
-// (Rights in Technical Data and Computer Software), as applicable.
-//
+
 
 using System;
 using System.Collections.Generic;
@@ -184,7 +164,7 @@ namespace Revit.Pricing
         #region IExternalCommand Members
 
         /// <summary>
-        /// Checks on API address
+        /// Checks at API address
         /// </summary>
         /// <param name="commandData">An object that is passed to the external application
         /// which contains data related to the command,
@@ -279,7 +259,7 @@ namespace Revit.Pricing
         #region IExternalCommand Members
 
         /// <summary>
-        /// generates pricing request JSON - no cartegory filter -  save as file
+        /// generates pricing request JSON - no category filter -  save as file
         /// </summary>
         /// <param name="commandData">An object that is passed to the external application
         /// which contains data related to the command,
@@ -464,7 +444,7 @@ namespace Revit.Pricing
             Application app = commandData.Application.Application;
             Document curDoc = commandData.Application.ActiveUIDocument.Document;
 
-            PricingRevitInteraction.UpdateElementParameterValue(curDoc, "352672", "Mark", "Testcomments");
+            PricingRevitInteraction.UpdateElementParameterValueString(curDoc, "352672", "Mark", "Testcomments");
 
             using (Transaction t = new Transaction(curDoc, "Regen"))
             {
@@ -804,7 +784,54 @@ namespace Revit.Pricing
                 System.Windows.Forms.MessageBox.Show("Error accessing API while submitting  data for pricing: " + ex.ToString());
                 return Autodesk.Revit.UI.Result.Failed;
             }
+            //extract id / cost from response
+            List<PriceResponseElement> plist = new List<PriceResponseElement>(); 
+            try
+            {
 
+
+                plist=Newtonsoft.Json.JsonConvert.DeserializeObject<List<PriceResponseElement>>(pricesJSON);
+
+
+
+
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Deserialization failure: " + ex.ToString());
+                return Autodesk.Revit.UI.Result.Failed;
+            }
+
+
+            if (plist.Count==0)
+            {
+                System.Windows.Forms.MessageBox.Show("No instance / cost found");
+                return Autodesk.Revit.UI.Result.Failed;
+            }
+            List<string> failures = new List<string>();
+            foreach (PriceResponseElement ple in plist)
+            {
+                try
+                {
+
+                    bool res = PricingRevitInteraction.UpdateElementParameterValueDouble(curDoc, ple.id, "cost", ple.cost);
+                    if (!res) failures.Add(ple.id);
+                }
+                catch(Exception ex)
+                {
+                    failures.Add(ple.id);
+                    
+                }
+            }
+
+            if (failures.Count>0)
+            {
+                System.Windows.Forms.MessageBox.Show("Failed to update some elements: "+ string.Join(",", failures.ToArray()));
+            }
+            else
+            {
+                System.Windows.Forms.MessageBox.Show("Successfully updated " + plist.Count + " elements");
+            }
 
             return Autodesk.Revit.UI.Result.Succeeded;
         }
