@@ -10,6 +10,7 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.ApplicationServices;
 using System.IO;
 using Newtonsoft.Json;
+using System.Reflection;
 
 namespace Revit.Pricing
 {
@@ -827,6 +828,182 @@ namespace Revit.Pricing
             if (failures.Count>0)
             {
                 System.Windows.Forms.MessageBox.Show("Failed to update some elements: "+ string.Join(",", failures.ToArray()));
+            }
+            else
+            {
+                System.Windows.Forms.MessageBox.Show("Successfully updated " + plist.Count + " elements");
+            }
+
+            return Autodesk.Revit.UI.Result.Succeeded;
+        }
+
+        #endregion
+    }
+
+
+
+    [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
+    [Autodesk.Revit.Attributes.Regeneration(Autodesk.Revit.Attributes.RegenerationOption.Manual)]
+    [Autodesk.Revit.Attributes.Journaling(Autodesk.Revit.Attributes.JournalingMode.NoCommandData)]
+    public class UpdateCustomPricing : IExternalCommand
+    {
+        #region IExternalCommand Members
+
+        /// <summary>
+        /// retrieves categories from server, generates price requests, sends, receives prices and updates model with parameter name in file parameter.txt in same folder as dll
+        /// </summary>
+        /// <param name="commandData">An object that is passed to the external application
+        /// which contains data related to the command,
+        /// such as the application object and active view.</param>
+        /// <param name="message">A message that can be set by the external application
+        /// which will be displayed if a failure or cancellation is returned by
+        /// the external command.</param>
+        /// <param name="elements">A set of elements to which the external application
+        /// can add elements that are to be highlighted in case of failure or cancellation.</param>
+        /// <returns>Return the status of the external command.
+        /// A result of Succeeded means that the API external method functioned as expected.
+        /// Cancelled can be used to signify that the user cancelled the external operation 
+        /// at some point. Failure should be returned if the application is unable to proceed with
+        /// the operation.</returns>
+        public Autodesk.Revit.UI.Result Execute(ExternalCommandData commandData,
+            ref string message, Autodesk.Revit.DB.ElementSet elements)
+        {
+            // NOTES: Anything can be done in this method, such as create a message box, 
+            // a task dialog or fetch some information from revit and so on.
+            // We mainly use the task dialog for example.
+
+            // Get the application and document from external command data.
+            Application app = commandData.Application.Application;
+            Document curDoc = commandData.Application.ActiveUIDocument.Document;
+
+            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+            UriBuilder uri = new UriBuilder(codeBase);
+            string path = Uri.UnescapeDataString(uri.Path);
+
+            string paramtextfile = Path.Combine(Path.GetDirectoryName(path), "parametername.txt");
+            if (!File.Exists(paramtextfile))
+            {
+                System.Windows.Forms.MessageBox.Show(paramtextfile + " not found!");
+                return Autodesk.Revit.UI.Result.Failed;
+            }
+
+            string paramname = File.ReadAllText(paramtextfile);
+
+            List<string> cats = new List<string>();
+
+            PricingHttpRest.InitializeClient("http://api.fairhomemaine.com", "");
+            string configJSON = "";
+            try
+            {
+                PricingHttpRest.APICommand = "pricing/config";
+                string result = PricingHttpRest.Get();
+
+                configJSON = PricingHttpRest.receivedContent;
+                if (result != "OK")
+                {
+                    System.Windows.Forms.MessageBox.Show("Error accessing API while getting config");
+                    return Autodesk.Revit.UI.Result.Failed;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Error accessing API while getting config");
+                return Autodesk.Revit.UI.Result.Failed;
+            }
+
+
+            try
+            {
+
+
+
+                Newtonsoft.Json.Linq.JToken jt = Newtonsoft.Json.Linq.JObject.Parse(configJSON);
+                Newtonsoft.Json.Linq.JToken jfil = jt.SelectToken("filters");
+                Newtonsoft.Json.Linq.JToken jcat = jfil.SelectToken("categories");
+                cats = jcat.ToObject<List<string>>();
+
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Deserialization failure: " + ex.ToString());
+                return Autodesk.Revit.UI.Result.Failed;
+            }
+            if (cats.Count == 0)
+                System.Windows.Forms.MessageBox.Show("No categories found, taking all");
+            //if (myConf.filters.Count==0)
+            //{
+            //    System.Windows.Forms.MessageBox.Show("No config data");
+            //    return Autodesk.Revit.UI.Result.Failed;
+            //}
+
+            revit_pricing_request price1 = utilities.get_pricing_request(curDoc, cats);
+
+
+            //send element data
+            string serialS = JsonConvert.SerializeObject(price1);
+            string pricesJSON = "";
+            try
+            {
+                PricingHttpRest.APICommand = "pricing/model1";
+                PricingHttpRest.sendContent = serialS;
+
+                string result = PricingHttpRest.Post();
+
+                pricesJSON = PricingHttpRest.receivedContent;
+                if (result != "OK")
+                {
+                    System.Windows.Forms.MessageBox.Show("Error accessing API while submitting data for pricing: " + result + " " + pricesJSON);
+                    return Autodesk.Revit.UI.Result.Failed;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Error accessing API while submitting  data for pricing: " + ex.ToString());
+                return Autodesk.Revit.UI.Result.Failed;
+            }
+            //extract id / cost from response
+            List<PriceResponseElement> plist = new List<PriceResponseElement>();
+            try
+            {
+
+
+                plist = Newtonsoft.Json.JsonConvert.DeserializeObject<List<PriceResponseElement>>(pricesJSON);
+
+
+
+
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Deserialization failure: " + ex.ToString());
+                return Autodesk.Revit.UI.Result.Failed;
+            }
+
+
+            if (plist.Count == 0)
+            {
+                System.Windows.Forms.MessageBox.Show("No instance / cost found");
+                return Autodesk.Revit.UI.Result.Failed;
+            }
+            List<string> failures = new List<string>();
+            foreach (PriceResponseElement ple in plist)
+            {
+                try
+                {
+
+                    bool res = PricingRevitInteraction.UpdateElementParameterValueDouble(curDoc, ple.id, paramname, ple.cost);
+                    if (!res) failures.Add(ple.id);
+                }
+                catch (Exception ex)
+                {
+                    failures.Add(ple.id);
+
+                }
+            }
+
+            if (failures.Count > 0)
+            {
+                System.Windows.Forms.MessageBox.Show("Failed to update some elements: " + string.Join(",", failures.ToArray()));
             }
             else
             {

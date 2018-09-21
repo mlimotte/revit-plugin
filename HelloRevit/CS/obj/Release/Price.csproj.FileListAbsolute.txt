@@ -10,3 +10,4 @@ D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\bin\R
 D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\obj\Release\Price.csproj.CopyComplete
 D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\obj\Release\WebPricing.dll
 D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\obj\Release\WebPricing.pdb
+D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\obj\Release\Price.csprojAssemblyReference.cache
