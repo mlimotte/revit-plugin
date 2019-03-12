@@ -90,6 +90,7 @@
     <Compile Include="PricingRESTAPI.cs" />
     <Compile Include="PricingRevitInteraction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

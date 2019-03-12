@@ -90,4 +90,14 @@
     <VendorId>ADSK</VendorId>
     <VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
   </AddIn>
+   <AddIn Type="Command">
+    <Assembly>D:\projects\upwork\revit price ADDON\PriceAddin\revit-plugin\HelloRevit\CS\bin\Debug\WebPricing.dl</Assembly>
+    <ClientId>d7437bde-719f-47b8-b908-6163892705c5</ClientId>
+    <FullClassName>Revit.Pricing.UpdateCustomPricing</FullClassName>
+    <Text>Update Custom Name Pricing</Text>
+    <Description>retrieves categories from server, generates price requests, sends, receives prices and updates model with parameter name in file parameter.txt in same folder as dll</Description>
+    <VisibilityMode>AlwaysVisible</VisibilityMode>
+    <VendorId>ADSK</VendorId>
+    <VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+  </AddIn>
 </RevitAddIns>

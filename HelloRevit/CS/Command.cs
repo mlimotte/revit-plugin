@@ -52,6 +52,9 @@ namespace Revit.Pricing
             //for text file
             List<string> lines = new List<string>();
 
+            //loads from settings.txt
+            settings.LoadSettings();
+
             //get document handle
            
             lines.Add("Document Title: " + curDoc.Title);
@@ -184,7 +187,9 @@ namespace Revit.Pricing
             ref string message, Autodesk.Revit.DB.ElementSet elements)
         {
 
-            PricingHttpRest.InitializeClient("http://api.fairhomemaine.com", "");
+            //loads from settings.txt
+            settings.LoadSettings();
+            PricingHttpRest.InitializeClient(settings.APILocation, "");
 
             try
             {
@@ -231,7 +236,9 @@ namespace Revit.Pricing
             ref string message, Autodesk.Revit.DB.ElementSet elements)
         {
 
-            PricingHttpRest.InitializeClient("http://api.fairhomemaine.com", "");
+            //loads from settings.txt
+            settings.LoadSettings();
+            PricingHttpRest.InitializeClient(settings.APILocation, "");
 
             try
             {
@@ -286,6 +293,8 @@ namespace Revit.Pricing
             Application app = commandData.Application.Application;
             Document curDoc = commandData.Application.ActiveUIDocument.Document;
 
+            //loads from settings.txt
+            settings.LoadSettings();
             revit_pricing_request price1 = utilities.get_pricing_request(curDoc, new List<string>());
 
             string serialS = JsonConvert.SerializeObject(price1);
@@ -341,9 +350,13 @@ namespace Revit.Pricing
             Application app = commandData.Application.Application;
             Document curDoc = commandData.Application.ActiveUIDocument.Document;
 
+
+            //loads from settings.txt
+            settings.LoadSettings();
+
             List<string> cats = new List<string>();
 
-            PricingHttpRest.InitializeClient("http://api.fairhomemaine.com", "");
+            PricingHttpRest.InitializeClient(settings.APILocation, "");
             string configJSON = "";
             try
             {
@@ -445,6 +458,8 @@ namespace Revit.Pricing
             Application app = commandData.Application.Application;
             Document curDoc = commandData.Application.ActiveUIDocument.Document;
 
+            //loads from settings.txt
+            settings.LoadSettings();
             PricingRevitInteraction.UpdateElementParameterValueString(curDoc, "352672", "Mark", "Testcomments");
 
             using (Transaction t = new Transaction(curDoc, "Regen"))
@@ -498,9 +513,11 @@ namespace Revit.Pricing
             Application app = commandData.Application.Application;
             Document curDoc = commandData.Application.ActiveUIDocument.Document;
 
+            //loads from settings.txt
+            settings.LoadSettings();
             List<string> cats = new List<string>();
 
-            PricingHttpRest.InitializeClient("http://api.fairhomemaine.com", "");
+            PricingHttpRest.InitializeClient(settings.APILocation, "");
             string configJSON = "";
             try
             {
@@ -623,9 +640,11 @@ namespace Revit.Pricing
             Application app = commandData.Application.Application;
             Document curDoc = commandData.Application.ActiveUIDocument.Document;
 
+            //loads from settings.txt
+            settings.LoadSettings();
             List<string> cats = new List<string>();
 
-            PricingHttpRest.InitializeClient("http://api.fairhomemaine.com", "");// "https://ce7649b3.ngrok.io", "");
+            PricingHttpRest.InitializeClient(settings.APILocation, "");// "https://ce7649b3.ngrok.io", "");
 
             // Displays an OpenFileDialog so the user can select a Cursor.  
             System.Windows.Forms.OpenFileDialog openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -713,9 +732,11 @@ namespace Revit.Pricing
             Application app = commandData.Application.Application;
             Document curDoc = commandData.Application.ActiveUIDocument.Document;
 
+            //loads from settings.txt
+            settings.LoadSettings();
             List<string> cats = new List<string>();
 
-            PricingHttpRest.InitializeClient("http://api.fairhomemaine.com", "");
+            PricingHttpRest.InitializeClient(settings.APILocation, "");
             string configJSON = "";
             try
             {
@@ -833,7 +854,14 @@ namespace Revit.Pricing
             {
                 System.Windows.Forms.MessageBox.Show("Successfully updated " + plist.Count + " elements");
             }
+            using (Transaction t = new Transaction(curDoc, "Regen"))
+            {
+                t.Start();
 
+
+                curDoc.Regenerate();
+                t.Commit();
+            }
             return Autodesk.Revit.UI.Result.Succeeded;
         }
 
@@ -876,6 +904,11 @@ namespace Revit.Pricing
             Application app = commandData.Application.Application;
             Document curDoc = commandData.Application.ActiveUIDocument.Document;
 
+
+            //loads from settings.txt
+            settings.LoadSettings();
+
+
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;
             UriBuilder uri = new UriBuilder(codeBase);
             string path = Uri.UnescapeDataString(uri.Path);
@@ -891,7 +924,7 @@ namespace Revit.Pricing
 
             List<string> cats = new List<string>();
 
-            PricingHttpRest.InitializeClient("http://api.fairhomemaine.com", "");
+            PricingHttpRest.InitializeClient(settings.APILocation, "");
             string configJSON = "";
             try
             {
@@ -1008,6 +1041,16 @@ namespace Revit.Pricing
             else
             {
                 System.Windows.Forms.MessageBox.Show("Successfully updated " + plist.Count + " elements");
+            }
+
+
+            using (Transaction t = new Transaction(curDoc, "Regen"))
+            {
+                t.Start();
+
+
+                curDoc.Regenerate();
+                t.Commit();
             }
 
             return Autodesk.Revit.UI.Result.Succeeded;

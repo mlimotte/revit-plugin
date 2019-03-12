@@ -59,7 +59,7 @@ namespace Revit.Pricing
             port = cPort;
             APICommand = "healthcheck";
             sendContent = "";
-
+           
 
         }
         static string AssemblyDirectory
@@ -109,7 +109,7 @@ namespace Revit.Pricing
             //using (HttpClient httpClient = new HttpClient())
             //{
             client = new HttpClient();
-
+            client.Timeout = TimeSpan.FromSeconds(60);
             // StringContent httpContent = new StringContent(xmlRequest, Encoding.UTF8, "application/json");
 
 
@@ -151,6 +151,7 @@ namespace Revit.Pricing
             //{
 
             client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(60);
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(
                        new MediaTypeWithQualityHeaderValue("application/json"));

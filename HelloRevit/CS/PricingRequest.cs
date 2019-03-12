@@ -29,36 +29,36 @@ namespace Revit.Pricing
         public string id;
         public string name;
         public string element_class_name;
-        
+
         //this will include family name and symbol name for family instance
 
-        public Dictionary<string,string> properties;
+        public Dictionary<string, string> properties;
 
         public p_element()
         {
             properties = new Dictionary<string, string>();
         }
     }
- //   /// <summary>
- //   /// Config
- //   /// </summary>
- //public class config
- //   {
- //       public IList<filter> filters;
- //       public config()
- //       {
- //           filters = new List<filter>();
- //       }
+    //   /// <summary>
+    //   /// Config
+    //   /// </summary>
+    //public class config
+    //   {
+    //       public IList<filter> filters;
+    //       public config()
+    //       {
+    //           filters = new List<filter>();
+    //       }
 
- //   }
- //   public class filter
- //   {
- //       public IList<string> categories;
- //       public filter()
- //       {
- //           categories = new List<string>();
- //       }
- //   }
+    //   }
+    //   public class filter
+    //   {
+    //       public IList<string> categories;
+    //       public filter()
+    //       {
+    //           categories = new List<string>();
+    //       }
+    //   }
 
     public static class utilities
     {
@@ -77,8 +77,7 @@ namespace Revit.Pricing
 
 
             //filter for family instances
-            FilteredElementCollector famCol = new FilteredElementCollector(curDoc);
-            famCol.OfClass(typeof(FamilyInstance));
+            FilteredElementCollector famCol = new FilteredElementCollector(curDoc).OfClass(typeof(FamilyInstance));
             IList<Element> famElems = famCol.ToElements();
             //iterate
             foreach (Element myE in famElems)
@@ -99,24 +98,49 @@ namespace Revit.Pricing
 
                     if (myParam.StorageType == StorageType.String)
                     {
-                        if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")) && myParam.AsString() != "" && myParam.AsString() != "null" && myParam.AsString() != null)
-                            fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsString());//.ToLower().Replace(" ", "_"));
 
+                        if (myParam.AsString() != "" && myParam.AsString() != "null" && myParam.AsString() != null)
+                        {
+                            if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")))
+                            {
+
+                                fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsString());//.ToLower().Replace(" ", "_"));
+                            }
+                            else
+                            {
+                                fIelem.properties[myParam.Definition.Name.ToLower().Replace(" ", "_")] += "," + myParam.AsString();
+                            }
+                        }
                     }
                     else
                     {
-                        if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")) && myParam.AsValueString() != "" && myParam.AsValueString() != "null" && myParam.AsValueString() != null)
-                            fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsValueString());//.ToLower().Replace(" ", "_"));
+                        if (myParam.AsValueString() != "" && myParam.AsValueString() != "null" && myParam.AsValueString() != null)
+                        {
+                            if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")))
+                            {
+
+
+                                fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsValueString());//.ToLower().Replace(" ", "_"));
+                            }
+                            else
+                            {
+                                fIelem.properties[myParam.Definition.Name.ToLower().Replace(" ", "_")] += "," + myParam.AsValueString();
+                            }
+                        }
                     }
                 }
-
-                if (categories.Count!=0)
+                if (categories.Count != 0)
                 {
                     if (fIelem.properties.ContainsKey("category"))
                     {
-                        if (formCat.Contains(fIelem.properties["category"]))
+                        foreach (string myc in formCat)
                         {
-                            price1.elements.Add(fIelem);
+
+                            if (fIelem.properties["category"].Contains(myc))
+                            {
+                                price1.elements.Add(fIelem);
+                                break;
+                            }
                         }
                     }
 
@@ -126,10 +150,10 @@ namespace Revit.Pricing
                     price1.elements.Add(fIelem);
                 }
 
-                
+
+
 
             }
-
             ElementClassFilter FamilyFilter = new ElementClassFilter(typeof(Family));
             FilteredElementCollector FamilyCollector = new FilteredElementCollector(curDoc);
             ICollection<Element> AllFamilies = FamilyCollector.WherePasses(FamilyFilter).ToElements();
@@ -155,27 +179,51 @@ namespace Revit.Pricing
 
                     foreach (Parameter myParam in FmlyS.Parameters)
                     {
-
                         if (myParam.StorageType == StorageType.String)
                         {
-                            if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")) && myParam.AsString() != "" && myParam.AsString() != "null" && myParam.AsString() != null)
-                                fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsString());//.ToLower().Replace(" ", "_"));
 
+                            if (myParam.AsString() != "" && myParam.AsString() != "null" && myParam.AsString() != null)
+                            {
+                                if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")))
+                                {
+
+                                    fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsString());//.ToLower().Replace(" ", "_"));
+                                }
+                                else
+                                {
+                                    fIelem.properties[myParam.Definition.Name.ToLower().Replace(" ", "_")] += "," + myParam.AsString();
+                                }
+                            }
                         }
                         else
                         {
-                            if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")) && myParam.AsValueString() != "" && myParam.AsValueString() != "null" && myParam.AsValueString() != null)
-                                fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsValueString());//.ToLower().Replace(" ", "_"));
+                            if (myParam.AsValueString() != "" && myParam.AsValueString() != "null" && myParam.AsValueString() != null)
+                            {
+                                if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")))
+                                {
+
+
+                                    fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsValueString());//.ToLower().Replace(" ", "_"));
+                                }
+                                else
+                                {
+                                    fIelem.properties[myParam.Definition.Name.ToLower().Replace(" ", "_")] += "," + myParam.AsValueString();
+                                }
+                            }
                         }
                     }
-
                     if (categories.Count != 0)
                     {
                         if (fIelem.properties.ContainsKey("category"))
                         {
-                            if (formCat.Contains(fIelem.properties["category"]))
+                            foreach (string myc in formCat)
                             {
-                                price1.elements.Add(fIelem);
+
+                                if (fIelem.properties["category"].Contains(myc))
+                                {
+                                    price1.elements.Add(fIelem);
+                                    break;
+                                }
                             }
                         }
 
@@ -184,9 +232,37 @@ namespace Revit.Pricing
                     {
                         price1.elements.Add(fIelem);
                     }
+                    //    if (myParam.StorageType == StorageType.String)
+                    //    {
+                    //        if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")) && myParam.AsString() != "" && myParam.AsString() != "null" && myParam.AsString() != null)
+                    //            fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsString());//.ToLower().Replace(" ", "_"));
+
+                    //    }
+                    //    else
+                    //    {
+                    //        if (!fIelem.properties.ContainsKey(myParam.Definition.Name.ToLower().Replace(" ", "_")) && myParam.AsValueString() != "" && myParam.AsValueString() != "null" && myParam.AsValueString() != null)
+                    //            fIelem.properties.Add(myParam.Definition.Name.ToLower().Replace(" ", "_"), myParam.AsValueString());//.ToLower().Replace(" ", "_"));
+                    //    }
+                    //}
+
+                    //if (categories.Count != 0)
+                    //{
+                    //    if (fIelem.properties.ContainsKey("category"))
+                    //    {
+                    //        if (formCat.Contains(fIelem.properties["category"]))
+                    //        {
+                    //            price1.elements.Add(fIelem);
+                    //        }
+                    //    }
+
+                    //}
+                    //else
+                    //{
+                    //    price1.elements.Add(fIelem);
+                    //}
+
+
                 }
-
-
 
             }
             return price1;

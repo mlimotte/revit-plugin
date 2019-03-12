@@ -73,6 +73,8 @@ namespace Revit.Pricing
             Element myElem = curDoc.GetElement(new ElementId(Convert.ToInt32(elemeID)));
             if (myElem == null) return false;
             bool foundPar = false;
+            bool setSuccess = false;
+
             foreach (Parameter myParam in myElem.Parameters)
             {
 
@@ -86,9 +88,17 @@ namespace Revit.Pricing
                             t.Start();
 
 
+                            if (myParam.StorageType==StorageType.String)
+                            {
+                                setSuccess=myParam.Set(parameterValue.ToString());
+                            }
+                            else
+                            {
+                               setSuccess= myParam.Set(parameterValue);
+                            }
                             //myParam.SetValueString(parameterValue);
 
-                            myParam.Set(parameterValue);
+                           
 
                             t.Commit();
                         }
@@ -104,12 +114,13 @@ namespace Revit.Pricing
 
 
             }
-            if (foundPar) return true;
+            if (foundPar) return setSuccess;
             //look through family symbol parameters
             FamilyInstance fm = myElem as FamilyInstance;
             if (fm == null) return false;
             FamilySymbol fmsym = fm.Symbol;
             if (fmsym == null) return false;
+            setSuccess = false;
             foreach (Parameter myParam in fmsym.Parameters)
             {
 
@@ -123,9 +134,14 @@ namespace Revit.Pricing
                             t.Start();
 
 
-                            //myParam.SetValueString(parameterValue);
-
-                            myParam.Set(parameterValue);
+                            if (myParam.StorageType == StorageType.String)
+                            {
+                                setSuccess = myParam.Set(parameterValue.ToString());
+                            }
+                            else
+                            {
+                                setSuccess = myParam.Set(parameterValue);
+                            }
 
                             t.Commit();
                         }
@@ -142,7 +158,7 @@ namespace Revit.Pricing
 
             }
 
-            if (foundPar) return true;
+            if (foundPar) return setSuccess;
             return false;
         }
 
